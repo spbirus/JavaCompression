@@ -1,0 +1,409 @@
+ 
+C++ Programs from Algorithms 2nd edition
+ 
+Copyright 1992. Addison-Wesley Publishing Company, Inc.
+All Rights Reserved. 
+ 
+ 
+--------------------------------
+CHAPTER 1 Introduction   
+ 
+ 
+--------------------------------
+CHAPTER 2 C++ (and C)
+ 
+#include <iostream.h>
+int gcd(int u, int v)
+  {
+    int t;
+    while (u > 0)
+      {
+        if (u < v) { t = u; u = v; v = t; }
+        u = u - v;
+      }
+    return v;
+   }
+main()
+  {
+    int x, y;
+    while (cin >> x && cin >> y)
+      if (x>0 && y>0) cout << x << ' ' << y << ' ' 
+                                << gcd(x,y) << '\n';
+  }
+ 
+--------------------------------
+CHAPTER 3 Elementary Data Structures 
+ 
+const int N = 1000;
+main()
+  {
+    int i, j, a[N+1];
+    for (a[1] = 0, i = 2; i <= N; i++) a[i] = 1;
+    for (i = 2; i <= N/2; i++)
+      for (j = 2; j <= N/i; j++) 
+        a[i*j] = 0;
+    for (i = 1; i <= N; i++)
+      if (a[i]) cout << i << ' ';
+    cout << '\n';
+  }
+ 
+    struct node 
+      { int key; struct node *next; };
+ 
+    struct node *head, *z;
+    head = new node; z = new node;
+    head->next = z; z->next = z;
+ 
+struct node 
+  { int key; struct node *next; };
+main()
+  { 
+    int i, N, M; 
+    struct node *t, *x;
+    cin >> N >> M;
+    t = new node; t->key = 1; x = t;
+    for (i = 2; i <= N; i++)
+      { 
+        t->next = new node;
+        t = t->next; t->key = i;
+      }
+    t->next = x;
+    while (t != t->next)
+      {
+        for (i = 1; i < M; i++) t = t->next;
+        cout << t->next->key << ' ';
+        x = t->next; t->next = x->next;
+        delete x;
+      }
+    cout << t->key << '\n';
+  }
+ 
+    key[x] = v; next[x] = next[t]; next[t] = x++;
+ 
+class Stack 
+  {
+    private:
+      itemType *stack;
+      int p;
+    public:
+      Stack(int max=100) 
+        { stack = new itemType[max]; p = 0; }
+     ~Stack()
+        { delete stack; }
+      inline void push(itemType v)
+        { stack[p++] = v; }
+      inline itemType pop()
+        { return stack[--p]; }
+      inline int empty()
+        { return !p; }
+  };
+ 
+    char c; Stack acc(50); int x;
+    while (cin.get(c))
+      {
+        x = 0;
+        while (c == ' ') cin.get(c);
+        if (c == '+') x = acc.pop() + acc.pop();
+        if (c == '*') x = acc.pop() * acc.pop();
+        while (c>='0' && c<='9')
+          { x = 10*x + (c-'0');  cin.get(c); }
+        acc.push(x);
+      }
+   cout << acc.pop() << '\n';
+ 
+    char c; Stack save(50);
+    while (cin.get(c))
+      {
+        if (c == ')') cout.put(save.pop());
+        if (c == '+') save.push(c);
+        if (c == '*') save.push(c);
+        while (c>='0' && c<='9') 
+          { cout.put(c); cin.get(c); } 
+        if (c != '(') cout << ' ';
+      }
+    cout << '\n';
+ 
+class Stack 
+  {
+    public:
+      Stack(int max); 
+     ~Stack();
+      void push(itemType v);
+      itemType pop();
+      int empty();
+    private:
+      struct node 
+       { itemType key; struct node *next; };
+      struct node *head, *z;
+  };
+ 
+Stack::Stack(int max) 
+  {
+    head = new node; z = new node;
+    head->next = z;  z->next = z;
+  }
+Stack::~Stack() 
+  { 
+    struct node *t = head;
+    while (t != z) 
+      { head = t; t = t->next; delete head; }
+  }
+ 
+void Stack::push(itemType v) 
+  {
+    struct node *t = new node;
+    t->key = v; t->next = head->next; 
+    head->next = t;
+  }
+itemType Stack::pop()   
+  {
+    itemType x;
+    struct node *t = head->next; 
+    head->next = t->next; x = t->key;
+    delete t; return x;
+  }
+int Stack::empty()
+  { return head->next == z; }
+ 
+void Queue::put(itemType v)
+  {
+    queue[tail++] = v;
+    if (tail > size) tail = 0; 
+  }
+itemType Queue::get()
+  { 
+    itemType t = queue[head++];
+    if (head > size) head = 0;
+    return t;
+  }
+int Queue::empty()
+  { return head == tail; }
+ 
+ 
+--------------------------------
+CHAPTER 4 Trees   
+ 
+    struct node
+      { char info; struct node *l, *r; };
+    struct node *x, *z;
+ 
+    char c; Stack stack(50);
+    z = new node; z->l = z; z->r = z;
+    while (cin.get(c))
+      {
+        while (c == ' ') cin.get(c);
+        x = new node;
+        x->info = c; x->l = z; x->r = z;
+        if (c=='+' || c=='*') 
+          { x->r = stack.pop(); x->l = stack.pop(); }
+        stack.push(x);
+      }
+ 
+traverse(struct node *t)
+  {
+    stack.push(t);
+    while (!stack.empty())
+      {
+        t = stack.pop(); visit(t);
+        if (t->r != z) stack.push(t->r); 
+        if (t->l != z) stack.push(t->l); 
+      }
+  }
+ 
+traverse(struct node *t)
+  {
+    queue.put(t);
+    while (!queue.empty())
+      {
+        t = queue.get(); visit(t);
+        if (t->l != z) queue.put(t->l); 
+        if (t->r != z) queue.put(t->r); 
+      }
+  }
+ 
+ 
+--------------------------------
+CHAPTER 5 Recursion   
+ 
+int factorial(int N)
+  {
+    if (N == 0) return 1;
+    return N * factorial(N-1);
+  }
+ 
+int fibonacci(int N)
+  {
+    if (N <= 1) return 1;
+    return fibonacci(N-1) + fibonacci(N-2);
+  }
+ 
+const int max = 25;
+int fibonacci(int N)
+  {
+    int i, F[max];
+    F[0] = 1; F[1] = 1;
+    for (i = 2; i <= max; i++) 
+        F[i] = F[i-1] + F[i-2];
+    return F[N];    
+  }
+ 
+rule(int l, int r, int h)
+  {
+    int m = (l+r)/2;
+    if (h > 0)
+      { 
+        mark(m,h);
+        rule(l,m,h-1);
+        rule(m,r,h-1);
+      }
+  }
+ 
+rule(0,8,3)
+   mark(4,3 )
+   rule(0,4,2)
+      mark(2,2)
+      rule(0,2,1)
+         mark(1,1)
+         rule(0,1,0)
+         rule(1,2,0)
+      rule(2,4,1)
+         mark(3,1)
+         rule(2,3,0)
+         rule(3,4,0)
+   rule(4,8,2)
+      mark(6,2)
+      rule(4,6,1)
+         mark(5,1)
+         rule(4,5,0)
+         rule(5,6,0)
+      rule(6,8,1)
+         mark(7,1)
+         rule(6,7,0)
+ 
+rule(0,8,3)
+   rule(0,4,2)
+      rule(0,2,1)
+         rule(0,1,0)
+         mark(1,1)
+         rule(1,2,0)
+      mark(2,2)
+      rule(2,4,1)
+         rule(2,3,0)
+         mark(3,1)
+         rule(3,4,0)
+   mark(4,3 )
+   rule(4,8,2)
+      rule(4,6,1)
+         rule(4,5,0)
+         mark(5,1)
+         rule(5,6,0)
+      mark(6,2)
+      rule(6,8,1)
+         rule(6,7,0)
+         mark(7,1)
+ 
+rule(int l, int r, int h)
+  { 
+    int i, j, t;
+    for (i = 1,j = 1; i <= h; i++,j+=j)
+      for (t = 0; t <= (l+r)/j; t++)
+        mark(l+j+t*(j+j),i);
+  }
+ 
+star(int x, int y, int r)
+  {
+    if (r > 0)
+      {
+        star(x-r,y+r,r/2);
+        star(x+r,y+r,r/2);
+        star(x-r,y-r,r/2);
+        star(x+r,y-r,r/2);
+        box(x,y,r);
+      }
+  }
+ 
+traverse(struct node *t)
+  {
+    if (t != z)
+      {
+        traverse(t->l);
+        visit(t);
+        traverse(t->r);
+      }
+  }
+ 
+visit(struct node *t)
+  { t->x = ++x; t->y = y; }
+traverse(struct node *t)
+  {
+    y++;
+    if (t != z)
+      {
+        traverse(t->l);
+        visit(t);
+        traverse(t->r)
+      }
+    y--;
+  }
+ 
+traverse(struct node *t)
+  {
+    if (t != z)
+      {
+        visit(t);
+        traverse(t->l);
+        traverse(t->r);
+      }
+  }
+ 
+traverse(struct node *t)
+  {
+   l: if (t == z) goto x;
+      visit(t);
+      traverse(t->l);
+      t = t->r;
+      goto l;
+   x: ;
+  }
+ 
+traverse(struct node *t)
+  {
+   l: if (t == z) goto s;
+      visit(t);
+      stack.push(t); t = t->l; goto l;
+   r: t = t->r; goto l;
+   s: if (stack.empty()) goto x;
+      t = stack.pop(); goto r;
+   x: ;
+  }
+ 
+traverse(struct node *t)
+  {
+   l: while (t != z)
+        {
+          visit(t);
+          stack.push(t->r); t = t->l;
+        }
+      if (stack.empty()) goto x;
+      t = stack.pop(); goto l;
+   x: ;
+  }
+ 
+traverse(struct node *t)
+  {
+    stack.push(t);
+    while (!stack.empty())
+      {
+        t = stack.pop();
+        while (t != z) 
+          {  
+            visit(t);
+            stack.push(t->r); 
+            t = t->l;
+          }
+      }
+  }
+ 
+traverse(struct node *t)
+  {
+    
